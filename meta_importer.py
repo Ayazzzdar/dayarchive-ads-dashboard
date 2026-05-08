@@ -91,50 +91,63 @@ class MetaImporter:
                 matched_adset_name = None
             
             # Import to database
-            self.db.add_performance_data(
-                reporting_starts=row['Reporting starts'],
-                reporting_ends=row.get('Reporting ends', row['Reporting starts']),
-                ad_name=str(row['Ad name']).strip(),
-                ad_set_name=matched_adset_name or ad_set_name,  # Use matched name if found
-                ad_delivery=str(row.get('Ad delivery', '')),
-                results=int(row.get('Results', 0)),
-                cost_per_results=float(row.get('Cost per results', 0)),
-                impressions=int(row.get('Impressions', 0)),
-                ad_set_budget=str(row.get('Ad set budget', '')),
-                amount_spent=float(row['Amount spent (AUD)']),
-                link_clicks=int(row.get('Link clicks', 0)),
-                ctr=float(row.get('CTR (link click-through rate)', 0)),
-                cpc=float(row.get('CPC (cost per link click) (AUD)', 0)),
-                adds_to_cart=int(row.get('Adds to cart', 0)),
-                cost_per_atc=float(row.get('Cost per add to cart (AUD)', 0)),
-                checkouts_initiated=int(row.get('Checkouts initiated', 0)),
-                cost_per_checkout=float(row.get('Cost per checkout initiated (AUD)', 0)),
-                purchases=int(row.get('Purchases', 0)),
-                cost_per_purchase=float(row.get('Cost per purchase (AUD)', 0)),
-                purchases_conversion_value=float(row.get('Purchases conversion value', 0)),
-                purchase_roas=float(row.get('Purchase ROAS (return on ad spend)', 0)),
-                cpm=float(row.get('CPM (cost per 1,000 impressions) (AUD)', 0)),
-                cvr=float(row.get('CVR', 0)),
-                frequency=float(row.get('Frequency', 0)),
-                ad_id=str(row.get('Ad ID', '')),
-                ad_set_id=str(row.get('Ad set ID', '')),
-                campaign_id=str(row.get('Campaign ID', '')),
-                hook_rate=float(row.get('Hook Rate', 0)),
-                hold_rate=float(row.get('Hold Rate New', 0))
-            )
-            
-            rows_imported += 1
+            try:
+                self.db.add_performance_data(
+                    reporting_starts=row['Reporting starts'],
+                    reporting_ends=row.get('Reporting ends', row['Reporting starts']),
+                    ad_name=str(row['Ad name']).strip(),
+                    ad_set_name=matched_adset_name or ad_set_name,  # Use matched name if found
+                    ad_delivery=str(row.get('Ad delivery', '')),
+                    results=int(row.get('Results', 0)),
+                    cost_per_results=float(row.get('Cost per results', 0)),
+                    impressions=int(row.get('Impressions', 0)),
+                    ad_set_budget=str(row.get('Ad set budget', '')),
+                    amount_spent=float(row['Amount spent (AUD)']),
+                    link_clicks=int(row.get('Link clicks', 0)),
+                    ctr=float(row.get('CTR (link click-through rate)', 0)),
+                    cpc=float(row.get('CPC (cost per link click) (AUD)', 0)),
+                    adds_to_cart=int(row.get('Adds to cart', 0)),
+                    cost_per_atc=float(row.get('Cost per add to cart (AUD)', 0)),
+                    checkouts_initiated=int(row.get('Checkouts initiated', 0)),
+                    cost_per_checkout=float(row.get('Cost per checkout initiated (AUD)', 0)),
+                    purchases=int(row.get('Purchases', 0)),
+                    cost_per_purchase=float(row.get('Cost per purchase (AUD)', 0)),
+                    purchases_conversion_value=float(row.get('Purchases conversion value', 0)),
+                    purchase_roas=float(row.get('Purchase ROAS (return on ad spend)', 0)),
+                    cpm=float(row.get('CPM (cost per 1,000 impressions) (AUD)', 0)),
+                    cvr=float(row.get('CVR', 0)),
+                    frequency=float(row.get('Frequency', 0)),
+                    ad_id=str(row.get('Ad ID', '')),
+                    ad_set_id=str(row.get('Ad set ID', '')),
+                    campaign_id=str(row.get('Campaign ID', '')),
+                    hook_rate=float(row.get('Hook Rate', 0)),
+                    hold_rate=float(row.get('Hold Rate New', 0))
+                )
+                rows_imported += 1
+            except Exception as e:
+                # Track first error for debugging
+                if 'import_errors' not in locals():
+                    import_errors = []
+                import_errors.append(f"Row {idx}: {str(e)}")
+                if len(import_errors) <= 3:  # Only store first 3 errors
+                    pass  # Continue processing other rows
         
         # Get unmatched ad sets
         all_ad_sets = df['Ad set name'].unique().tolist()
         creative_ad_sets = [c['ad_set_name'] for c in self.db.get_all_creative_tests()]
         unmatched = [ad_set for ad_set in all_ad_sets if ad_set not in creative_ad_sets]
         
-        return {
+        result = {
             'rows_imported': rows_imported,
             'matched_to_creative_tracker': matched_count,
             'unmatched_ad_sets': unmatched[:10]  # First 10
         }
+        
+        # Add errors if any occurred
+        if 'import_errors' in locals() and import_errors:
+            result['errors'] = import_errors[:5]  # First 5 errors
+        
+        return result
     
     def import_csv(self, uploaded_file) -> Dict:
         """Import CSV format (same logic as Excel)"""
