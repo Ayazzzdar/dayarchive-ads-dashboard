@@ -7,6 +7,32 @@ class MetaImporter:
     def __init__(self, database):
         self.db = database
     
+    def fuzzy_match_adset(self, meta_adset_name: str) -> str:
+        """
+        Fuzzy match Meta ad set name to Creative Tracker
+        Ignores: spacing, brackets, parentheses, case
+        """
+        # Normalize the Meta ad set name
+        normalized_meta = self.normalize_adset_name(meta_adset_name)
+        
+        # Get all creative tests
+        creatives = self.db.get_all_creative_tests()
+        
+        for creative in creatives:
+            normalized_creative = self.normalize_adset_name(creative['ad_set_name'])
+            
+            if normalized_meta == normalized_creative:
+                return creative['ad_set_name']  # Return the original creative tracker name
+        
+        return None  # No match found
+    
+    def normalize_adset_name(self, name: str) -> str:
+        """Normalize ad set name for matching"""
+        import re
+        # Remove all spaces, brackets, parentheses, convert to lowercase
+        normalized = re.sub(r'[\s\(\)\[\]\{\}]', '', name.lower())
+        return normalized
+    
     def import_excel(self, uploaded_file) -> Dict:
         """
         Import Meta Ads Manager Excel export
@@ -54,19 +80,22 @@ class MetaImporter:
         rows_imported = 0
         
         for idx, row in df.iterrows():
-            # Try to match ad set name to creative tracker
-            ad_set_name = str(row['Ad set name']).strip()  # Strip whitespace!
-            creative_match = self.db.get_creative_by_adset_name(ad_set_name)
+            # Try to match ad set name to creative tracker using fuzzy matching
+            ad_set_name = str(row['Ad set name']).strip()
+            creative_match = self.fuzzy_match_adset(ad_set_name)  # Use fuzzy matching!
             
             if creative_match:
                 matched_count += 1
+                matched_adset_name = creative_match  # Use the matched creative tracker name
+            else:
+                matched_adset_name = None
             
             # Import to database
             self.db.add_performance_data(
                 reporting_starts=row['Reporting starts'],
                 reporting_ends=row.get('Reporting ends', row['Reporting starts']),
                 ad_name=str(row['Ad name']).strip(),
-                ad_set_name=str(row['Ad set name']).strip(),  # Strip whitespace!
+                ad_set_name=matched_adset_name or ad_set_name,  # Use matched name if found
                 ad_delivery=str(row.get('Ad delivery', '')),
                 results=int(row.get('Results', 0)),
                 cost_per_results=float(row.get('Cost per results', 0)),
