@@ -136,7 +136,7 @@ class RecommendationEngine:
                     'angle': creative_data['angle'],
                     'avatar': creative_data['avatar'],
                     'variable': creative_data['variable_tested'],
-                    'awareness': creative_data['awareness_stage']
+                    'awareness': creative_data.get('awareness_level', 'Unknown')
                 })
             elif roas < self.ROAS_KILL_THRESHOLD:
                 losers.append({
