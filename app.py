@@ -380,6 +380,13 @@ elif page == "📈 Meta Performance":
                 
                 st.success(f"✅ Imported {result['rows_imported']} rows!")
                 
+                # IMMEDIATE VERIFICATION - Check if data actually in database
+                verify_count = len(db.get_recent_performance(days=90))
+                if verify_count > 0:
+                    st.success(f"✅ VERIFIED: {verify_count} rows found in database!")
+                else:
+                    st.error(f"❌ ERROR: Data imported but NOT found in database! This is a database persistence issue.")
+                
                 if result.get('errors'):
                     st.error(f"⚠️ {len(result['errors'])} rows failed to import:")
                     for error in result['errors']:
