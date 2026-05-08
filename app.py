@@ -534,8 +534,10 @@ elif page == "🔬 Hypothesis Validation":
         st.markdown("---")
         
         for v in validations:
-            with st.expander(f"{v['ad_set_name']} - {v['conclusion']}", 
-                           expanded=(v['conclusion'] == 'Validated ✅')):
+            # Only auto-expand validated if we're showing ALL (not filtering)
+            should_expand = (v['conclusion'] == 'Validated ✅' and st.session_state['validation_filter'] == 'All')
+            
+            with st.expander(f"{v['ad_set_name']} - {v['conclusion']}", expanded=should_expand):
                 col1, col2 = st.columns([2, 1])
                 
                 with col1:
