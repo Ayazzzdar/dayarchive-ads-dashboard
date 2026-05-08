@@ -473,27 +473,40 @@ elif page == "🔬 Hypothesis Validation":
     
     st.markdown("""
     **Validation Criteria:**
-    - ✅ **Validated**: ROAS ≥ 3.0x + 10 conversions
-    - ⚠️ **Inconclusive**: < 10 conversions
-    - ❌ **Invalidated**: ROAS < 1.0x + 10 conversions
+    
+    **After 7+ Days:**
+    - ✅ **Validated:** ROAS ≥ 2.0x
+    - ⚠️ **Partially Validated:** ROAS 1.0x - 2.0x (profitable but needs optimization)
+    - ❌ **Invalidated:** ROAS < 1.0x
+    
+    **Before 7 Days (Early Signals):**
+    - 🔥 **Early Winner:** ROAS ≥ 2.0x (prepare to scale!)
+    - 📊 **Promising Signal:** ROAS 1.5x - 2.0x (learning opportunity)
+    - ⏳ **Inconclusive (Early):** < 7 days running
     """)
     
     validations = hypothesis_engine.validate_all_hypotheses()
     
     if validations:
-        col1, col2, col3, col4 = st.columns(4)
-        validated = sum(1 for v in validations if v['conclusion'] == 'Validated')
-        invalidated = sum(1 for v in validations if v['conclusion'] == 'Invalidated')
-        inconclusive = sum(1 for v in validations if v['conclusion'] == 'Inconclusive')
+        col1, col2, col3, col4, col5 = st.columns(5)
+        
+        # Count by conclusion type (handle emojis and variations)
+        validated = sum(1 for v in validations if 'Validated ✅' in v['conclusion'])
+        invalidated = sum(1 for v in validations if 'Invalidated ❌' in v['conclusion'])
+        partially = sum(1 for v in validations if 'Partially Validated' in v['conclusion'])
+        early_winner = sum(1 for v in validations if 'Early Winner' in v['conclusion'])
+        promising = sum(1 for v in validations if 'Promising Signal' in v['conclusion'])
         
         with col1:
             st.metric("✅ Validated", validated)
         with col2:
-            st.metric("❌ Invalidated", invalidated)
+            st.metric("🔥 Early Winners", early_winner)
         with col3:
-            st.metric("⚠️ Inconclusive", inconclusive)
+            st.metric("📊 Promising", promising)
         with col4:
-            st.metric("Total", len(validations))
+            st.metric("⚠️ Partial", partially)
+        with col5:
+            st.metric("Total Tests", len(validations))
         
         st.markdown("---")
         
