@@ -170,7 +170,8 @@ class RecommendationEngine:
         for ad_set_name, stats in adset_stats.items():
             roas = stats['revenue'] / stats['spend'] if stats['spend'] > 0 else 0
             
-            if stats['conversions'] < self.MIN_CONVERSIONS:
+            # Skip low performers
+            if roas < 1.0:
                 continue
             
             creative_data = self.db.get_creative_by_adset_name(ad_set_name)
@@ -248,7 +249,7 @@ class RecommendationEngine:
         for ad_set_name, stats in adset_stats.items():
             roas = stats['revenue'] / stats['spend'] if stats['spend'] > 0 else 0
             
-            if roas >= self.ROAS_TARGET and stats['conversions'] >= self.MIN_CONVERSIONS:
+            if roas >= self.ROAS_TARGET and stats['conversions'] >= 5:  # At least 5 conversions for statistical significance
                 creative_data = self.db.get_creative_by_adset_name(ad_set_name)
                 if creative_data:
                     winners.append(creative_data)
@@ -311,15 +312,15 @@ class RecommendationEngine:
         # Calculate daily spend
         daily_spend = {}
         for row in performance_data:
-            date = row['date']
+            date = row['reporting_ends']  # Use reporting_ends as the date
             if date not in daily_spend:
                 daily_spend[date] = 0
-            daily_spend[date] += row['spend']
+            daily_spend[date] += row['amount_spent']
         
         avg_daily_spend = sum(daily_spend.values()) / len(daily_spend) if daily_spend else 0
         
         # Calculate overall ROAS
-        total_spend = sum(row['spend'] for row in performance_data)
+        total_spend = sum(row['amount_spent'] for row in performance_data)
         total_revenue = sum(row['revenue'] for row in performance_data)
         overall_roas = total_revenue / total_spend if total_spend > 0 else 0
         
