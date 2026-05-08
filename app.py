@@ -34,6 +34,23 @@ def get_database():
     return Database()
 
 db = get_database()
+
+# Auto-import creative tracker if database is empty (first-time setup)
+if 'setup_complete' not in st.session_state:
+    creatives = db.get_all_creative_tests()
+    if len(creatives) == 0:
+        # Database is empty - run first-time import
+        try:
+            import import_historical_data as importer
+            creative_file = 'Creative_Hit_Rate_Tracker___The_Day_Archive___2026_.xlsx'
+            importer.import_creative_tracker(creative_file, db)
+            st.session_state['setup_complete'] = True
+            st.success("✅ Creative Tracker loaded automatically!")
+        except:
+            pass  # Files might not be uploaded yet
+    else:
+        st.session_state['setup_complete'] = True
+
 meta_importer = MetaImporter(db)
 hypothesis_engine = HypothesisEngine(db)
 recommendation_engine = RecommendationEngine(db)
@@ -470,25 +487,17 @@ elif page == "💡 Recommendations":
 elif page == "⚙️ Settings":
     st.header("⚙️ Settings")
     
-    tab1, tab2, tab3 = st.tabs(["🔑 API Keys", "🛍️ Shopify", "🗄️ Database"])
+    tab1, tab2 = st.tabs(["🛍️ Shopify", "🔑 Claude API"])
     
     with tab1:
-        st.subheader("Claude API (for Creative Analysis)")
-        api_key = st.text_input("Claude API Key", type="password", 
-                                value=st.session_state.get('claude_api_key', ''))
-        if st.button("Save API Key"):
-            st.session_state['claude_api_key'] = api_key
-            st.success("✅ Saved!")
-    
-    with tab2:
-        st.subheader("Shopify Configuration")
+        st.subheader("Shopify Integration")
         
         st.markdown("""
-        ### How to get Shopify API credentials:
-        1. Shopify Admin → Settings → Apps and sales channels
-        2. Develop apps → Create an app
-        3. Configure scopes: `read_orders`, `read_customers`
-        4. Install app → Copy Admin API access token
+        ### How to Connect Shopify:
+        1. Use your **existing Shopify API** from your other dashboard
+        2. OR create new app: Shopify Admin → Settings → Apps → Create app
+        3. Enable scopes: `read_orders`, `read_customers`
+        4. Copy Admin API access token
         """)
         
         shop_url = st.text_input("Store URL", placeholder="thedayarchive.myshopify.com",
@@ -496,109 +505,37 @@ elif page == "⚙️ Settings":
         access_token = st.text_input("Access Token", type="password",
                                      value=st.session_state.get('shopify_token', ''))
         
-        if st.button("Save Shopify Config"):
+        if st.button("💾 Save Shopify Config"):
             st.session_state['shopify_url'] = shop_url
             st.session_state['shopify_token'] = access_token
             st.session_state['shopify_configured'] = True
             st.success("✅ Shopify configured!")
         
+        st.markdown("---")
+        
         if st.session_state.get('shopify_configured'):
-            st.markdown("---")
-            if st.button("📥 Import Orders (Last 30 Days)"):
-                st.info("Shopify import will be available after you add your existing Shopify connector!")
+            st.info("✅ Shopify Connected")
+            
+            if st.button("📥 Import Last 30 Days Orders"):
+                st.warning("⚠️ Connect your existing Shopify API module from your research dashboard to enable order imports.")
+                st.code("""
+# In your Shopify connector:
+from shopify_connector import ShopifyConnector
+
+connector = ShopifyConnector(shop_url, access_token, db)
+result = connector.import_orders_to_database(days_back=30)
+                """)
     
-    with tab3:
-        st.subheader("Database Management")
+    with tab2:
+        st.subheader("Claude API (for Creative Analysis)")
         
-        # One-time data import
-        st.markdown("### 📥 First-Time Setup")
-        st.info("Import your historical Creative Tracker and Meta performance data")
+        api_key = st.text_input("Claude API Key", type="password", 
+                                value=st.session_state.get('claude_api_key', ''))
+        if st.button("💾 Save API Key"):
+            st.session_state['claude_api_key'] = api_key
+            st.success("✅ API key saved!")
         
-        if st.button("🚀 Import Historical Data", type="primary"):
-            with st.spinner("Importing data..."):
-                try:
-                    import import_historical_data as importer
-                    
-                    # Import creative tracker
-                    creative_file = 'Creative_Hit_Rate_Tracker___The_Day_Archive___2026_.xlsx'
-                    creatives_imported = importer.import_creative_tracker(creative_file, db)
-                    
-                    # Import Meta data
-                    meta_file = 'Archive-Ads-Apr-1-2026-May-6-2026.xlsx'
-                    meta_imported = importer.import_meta_performance(meta_file, db)
-                    
-                    st.success(f"""
-                    ✅ Import Complete!
-                    - {creatives_imported} creative tests
-                    - {meta_imported} Meta performance records
-                    
-                    Go to Dashboard Overview to see your data!
-                    """)
-                except FileNotFoundError:
-                    st.error("❌ Historical data files not found. Make sure Excel files are in the same directory.")
-                except Exception as e:
-                    st.error(f"❌ Import error: {str(e)}")
-        
-        st.markdown("---")
-        
-        # Quick add missing ad sets
-        st.markdown("### 🔧 Add Missing Ad Sets")
-        st.info("Add the 10 ad sets from Meta that aren't in your Creative Tracker yet")
-        
-        if st.button("➕ Add Missing Ad Sets"):
-            missing_adsets = [
-                "Scaling Winners - 9/4",
-                "Concept 6 - Us vs Them - Variation V1 - 30/4",
-                "Concept 9 - Video Walkthrough - 30/4",
-                "Concept 9 - V1 - Video Walkthrough - 2/5",
-                "27th-3rd May Winner",
-                "Concept 10 - Native V1 - 5/5 - (2:2)",
-                "Concept 11 - Not Just Personalised - 6/5",
-                "Concept 12 - Native Long Form - 6/5",
-                "Concept 12 - V1 - Native Long Form - 7/5",
-                "Concept 13 - Claymation C12  - 7/5"
-            ]
-            
-            added = 0
-            for ad_set in missing_adsets:
-                try:
-                    # Check if already exists
-                    existing = db.get_creative_by_adset_name(ad_set)
-                    if not existing:
-                        db.add_creative_test(
-                            campaign="Launch - ABO",
-                            ad_set_name=ad_set,
-                            launch_date=datetime.now().strftime("%Y-%m-%d"),
-                            variable_tested="Unknown",
-                            format_type="Unknown",
-                            hypothesis="Imported from Meta data - add details later",
-                            status="Launched"
-                        )
-                        added += 1
-                except:
-                    pass
-            
-            st.success(f"✅ Added {added} missing ad sets! Now they'll match Meta data.")
-        
-        st.markdown("---")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("📥 Export Creative Tests"):
-                creatives = db.get_all_creative_tests()
-                if creatives:
-                    df = pd.DataFrame(creatives)
-                    csv = df.to_csv(index=False)
-                    st.download_button("Download", csv, 
-                                     f"creative_tests_{datetime.now().strftime('%Y%m%d')}.csv")
-        
-        with col2:
-            st.warning("⚠️ Danger Zone")
-            if st.button("🗑️ Clear All Data"):
-                confirm = st.checkbox("I understand this deletes everything")
-                if confirm and st.button("Yes, delete all"):
-                    db.clear_all_data()
-                    st.success("✅ Cleared!")
+        st.caption("Get your API key from console.anthropic.com")
 
 # Footer
 st.markdown("---")
