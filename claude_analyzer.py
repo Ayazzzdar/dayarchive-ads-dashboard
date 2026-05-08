@@ -90,7 +90,7 @@ class ClaudeAnalyzer:
 - Format: {creative_data.get('format', 'N/A')}
 - Variable Tested: {creative_data.get('variable_tested', 'N/A')}
 - Avatar: {creative_data.get('avatar', 'N/A')}
-- Awareness Stage: {creative_data.get('awareness_stage', 'N/A')}
+- Awareness Level: {creative_data.get('awareness_level', 'N/A')}
 - Angle/Hook: {creative_data.get('angle', 'N/A')}
 - Hypothesis: {creative_data.get('hypothesis', 'N/A')}
 """
