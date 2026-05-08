@@ -582,7 +582,21 @@ elif page == "🔬 Hypothesis Validation":
 elif page == "💡 Recommendations":
     st.header("💡 AI-Powered Recommendations")
     
-    recommendations = recommendation_engine.generate_recommendations()
+    # Date range selector
+    col1, col2 = st.columns(2)
+    with col1:
+        days_to_analyze = st.selectbox(
+            "📅 Analyze data from:",
+            options=[7, 14, 30, 60, 90],
+            index=2,  # Default to 30 days
+            help="Select how many days of data to analyze for recommendations"
+        )
+    with col2:
+        st.metric("Date Range", f"Last {days_to_analyze} days")
+    
+    st.markdown("---")
+    
+    recommendations = recommendation_engine.generate_recommendations(days=days_to_analyze)
     
     # Debug info
     with st.expander("🔍 Debug Info"):
