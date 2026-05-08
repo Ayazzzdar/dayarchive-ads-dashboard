@@ -47,8 +47,8 @@ class ShopifyConnector:
         params = {
             'status': status,
             'created_at_min': created_at_min,
-            'limit': 250,  # Max per page
-            'fields': 'id,order_number,created_at,total_price,financial_status,customer,landing_site_ref,referring_site,source_name'
+            'limit': 250  # Max per page
+            # Don't use 'fields' parameter - we need full order objects to get customer marketing data
         }
         
         all_orders = []
@@ -88,14 +88,13 @@ class ShopifyConnector:
     
     def extract_utm_params(self, order: Dict) -> Dict:
         """
-        Extract UTM parameters from order landing site
+        Extract UTM parameters from order
         
-        Shopify stores UTM params in landing_site_ref field
-        Format: ?utm_source=facebook&utm_medium=cpc&utm_campaign=X&utm_content=Y
+        Shopify 2024-01+ API stores UTM params in multiple places:
+        1. customer_journey_summary.last_visit.utm_parameters (most reliable)
+        2. client_details fields
+        3. landing_site_ref (fallback)
         """
-        landing_site = order.get('landing_site_ref', '')
-        referring_site = order.get('referring_site', '')
-        
         utm_params = {
             'utm_source': None,
             'utm_medium': None,
@@ -104,19 +103,66 @@ class ShopifyConnector:
             'utm_term': None
         }
         
-        if not landing_site:
-            return utm_params
+        # Try customer_journey_summary first (Shopify 2024-01+ API)
+        customer_journey = order.get('customer_journey_summary')
+        if customer_journey and customer_journey.get('last_visit'):
+            last_visit = customer_journey['last_visit']
+            
+            # Extract from utm_parameters object
+            if 'utm_parameters' in last_visit:
+                utm_data = last_visit['utm_parameters']
+                utm_params['utm_source'] = utm_data.get('utm_source')
+                utm_params['utm_medium'] = utm_data.get('utm_medium')
+                utm_params['utm_campaign'] = utm_data.get('utm_campaign')
+                utm_params['utm_content'] = utm_data.get('utm_content')
+                utm_params['utm_term'] = utm_data.get('utm_term')
+                
+                if any(v is not None for v in utm_params.values()):
+                    return utm_params
+            
+            # Fallback: parse from landing_site in last_visit
+            landing_site = last_visit.get('landing_site')
+            if landing_site and '?' in landing_site:
+                return self._parse_utm_from_url(landing_site)
         
-        # Parse query string
-        if '?' in landing_site:
-            query_string = landing_site.split('?')[1]
+        # Try client_details (alternative location)
+        client_details = order.get('client_details')
+        if client_details:
+            for key in ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']:
+                if key in client_details:
+                    utm_params[key] = client_details[key]
+            
+            if any(v is not None for v in utm_params.values()):
+                return utm_params
+        
+        # Fallback: landing_site_ref (older API)
+        landing_site_ref = order.get('landing_site_ref', '')
+        if landing_site_ref:
+            return self._parse_utm_from_url(landing_site_ref)
+        
+        return utm_params
+    
+    def _parse_utm_from_url(self, url: str) -> Dict:
+        """Parse UTM parameters from URL query string"""
+        utm_params = {
+            'utm_source': None,
+            'utm_medium': None,
+            'utm_campaign': None,
+            'utm_content': None,
+            'utm_term': None
+        }
+        
+        if '?' in url:
+            query_string = url.split('?')[1]
             params = query_string.split('&')
             
             for param in params:
                 if '=' in param:
                     key, value = param.split('=', 1)
                     if key in utm_params:
-                        utm_params[key] = value
+                        # URL decode the value
+                        import urllib.parse
+                        utm_params[key] = urllib.parse.unquote(value)
         
         return utm_params
     
