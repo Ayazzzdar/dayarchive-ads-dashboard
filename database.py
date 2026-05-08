@@ -4,7 +4,15 @@ from typing import Dict, List, Optional
 import json
 
 class Database:
-    def __init__(self, db_path="ads_dashboard.db"):
+    def __init__(self, db_path=None):
+        # Use Streamlit's data directory for persistence
+        if db_path is None:
+            import os
+            # Create data directory if it doesn't exist
+            data_dir = os.path.join(os.getcwd(), 'data')
+            os.makedirs(data_dir, exist_ok=True)
+            db_path = os.path.join(data_dir, 'ads_dashboard.db')
+        
         self.db_path = db_path
         self.init_database()
     
