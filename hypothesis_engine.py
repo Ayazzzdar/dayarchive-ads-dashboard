@@ -116,7 +116,7 @@ class HypothesisEngine:
             learnings.append(f"✅ {creative['format']} format generates strong {ctr:.2f}% CTR.")
         
         # Awareness stage learnings
-        learnings.append(f"✅ {creative['awareness_stage']} messaging works for this audience.")
+        learnings.append(f"✅ {creative.get('awareness_level', 'Unknown')} messaging works for this audience.")
         
         return " ".join(learnings)
     
