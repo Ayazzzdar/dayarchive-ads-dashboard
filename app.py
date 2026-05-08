@@ -613,6 +613,24 @@ elif page == "⚙️ Settings":
                             - Match rate: {result['match_rate']:.1f}%
                             """)
                             
+                            # Show debug info
+                            if 'debug_info' in result and result['debug_info']:
+                                with st.expander("🔍 Debug Info - Shopify API Response"):
+                                    debug = result['debug_info']
+                                    st.write(f"**Sample Order:** #{debug.get('order_number')}")
+                                    st.write(f"**Available fields:** {', '.join(debug.get('available_fields', []))}")
+                                    st.write(f"**Has customer_journey_summary:** {debug.get('has_customer_journey_summary')}")
+                                    st.write(f"**Has client_details:** {debug.get('has_client_details')}")
+                                    st.write(f"**Has landing_site_ref:** {debug.get('has_landing_site_ref')}")
+                                    
+                                    if debug.get('customer_journey_keys'):
+                                        st.write(f"**customer_journey_summary keys:** {', '.join(debug['customer_journey_keys'])}")
+                                    if debug.get('last_visit_keys'):
+                                        st.write(f"**last_visit keys:** {', '.join(debug['last_visit_keys'])}")
+                                    
+                                    st.write("**UTM Extraction Test:**")
+                                    st.json(debug.get('utm_extraction_test', {}))
+                            
                             st.info("Go to 'Shopify Revenue' tab to see attribution!")
                     
                     except ImportError:
