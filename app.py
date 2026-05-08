@@ -586,10 +586,15 @@ elif page == "💡 Recommendations":
     
     # Debug info
     with st.expander("🔍 Debug Info"):
-        st.write("Recommendations returned:", recommendations)
-        st.write("Scale opportunities:", len(recommendations.get('scale_opportunities', [])))
-        st.write("Pause recommendations:", len(recommendations.get('pause_recommendations', [])))
-        st.write("Next tests:", len(recommendations.get('next_tests', [])))
+        st.write("**Recommendations returned:**", recommendations)
+        st.write("**Scale opportunities:**", len(recommendations.get('scale_opportunities', [])))
+        st.write("**Pause recommendations:**", len(recommendations.get('pause_recommendations', [])))
+        st.write("**Next tests:**", len(recommendations.get('next_tests', [])))
+        
+        if 'debug' in recommendations:
+            st.markdown("---")
+            st.markdown("**Engine Debug:**")
+            st.write(recommendations['debug'])
     
     # Scale Opportunities
     st.subheader("📈 Scale These Now")
