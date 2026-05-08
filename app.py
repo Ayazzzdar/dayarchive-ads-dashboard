@@ -132,7 +132,7 @@ if page == "📊 Dashboard":
             df_display['roas'] = df_display['roas'].apply(lambda x: f"{x:.2f}x")
             df_display.columns = ['Ad Name', 'Spend', 'Revenue', 'Conversions', 'ROAS']
             
-            st.dataframe(df_display, use_container_width=True, hide_index=True)
+            st.dataframe(df_display, width="stretch", hide_index=True)
     else:
         st.info("📥 No data yet. Upload Meta performance data to get started!")
         st.markdown("---")
@@ -193,7 +193,7 @@ elif page == "🎨 Creative Tracker":
             results = st.text_area("Results", placeholder="Performance notes...", height=60)
             learnings = st.text_area("Learnings", placeholder="What did you learn?", height=60)
             
-            submitted = st.form_submit_button("💾 Save Creative Test", use_container_width=True)
+            submitted = st.form_submit_button("💾 Save Creative Test", width="stretch")
             
             if submitted:
                 if not ad_set_name or not hypothesis:
@@ -247,7 +247,7 @@ elif page == "🎨 Creative Tracker":
                 col1, col2 = st.columns(2)
                 
                 with col1:
-                    if st.button("🔄 Re-import from Excel", use_container_width=True):
+                    if st.button("🔄 Re-import from Excel", width="stretch"):
                         with st.spinner("Re-importing from Excel..."):
                             try:
                                 import import_historical_data as importer
@@ -282,7 +282,7 @@ elif page == "🎨 Creative Tracker":
                                 st.code(traceback.format_exc())
                 
                 with col2:
-                    if st.button("🗑️ Clear Placeholders Only", use_container_width=True):
+                    if st.button("🗑️ Clear Placeholders Only", width="stretch"):
                         # Delete only the placeholder creatives
                         for creative in creatives:
                             if creative.get('hypothesis') == 'Imported from Meta data - add details later':
@@ -315,7 +315,7 @@ elif page == "🎨 Creative Tracker":
             # Display
             st.dataframe(
                 df[['launch_date', 'ad_set_name', 'campaign', 'variable_tested', 'angle', 'status']],
-                use_container_width=True, hide_index=True
+                width="stretch", hide_index=True
             )
             
             # Edit status
@@ -393,7 +393,7 @@ elif page == "📈 Meta Performance":
             df_display.columns = ['Date', 'Ad', 'Ad Set', 'Spend', 'Revenue', 'Purchases', 
                                  'ROAS', 'CTR', 'ATC']
             
-            st.dataframe(df_display, use_container_width=True, hide_index=True)
+            st.dataframe(df_display, width="stretch", hide_index=True)
             
             # Download
             csv = df.to_csv(index=False)
@@ -445,7 +445,7 @@ elif page == "🛍️ Shopify Revenue":
             st.dataframe(
                 df_orders[['created_at', 'order_number', 'total_price', 'matched_ad_name', 
                           'utm_campaign', 'utm_content']].head(20),
-                use_container_width=True, hide_index=True
+                width="stretch", hide_index=True
             )
         else:
             st.info("No Shopify orders imported yet. Check Settings to import.")
