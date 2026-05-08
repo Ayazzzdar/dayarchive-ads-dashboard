@@ -279,7 +279,7 @@ class Database:
         conn.close()
     
     def get_recent_performance(self, days: int = 7, limit: int = None) -> List[Dict]:
-        """Get recent performance data"""
+        """Get recent performance data - filters by reporting_ends (most recent data point)"""
         conn = self.get_connection()
         cursor = conn.cursor()
         
@@ -287,8 +287,8 @@ class Database:
         
         query = """
         SELECT * FROM meta_performance
-        WHERE reporting_starts >= ?
-        ORDER BY reporting_starts DESC, amount_spent DESC
+        WHERE reporting_ends >= ?
+        ORDER BY reporting_ends DESC, amount_spent DESC
         """
         
         if limit:
