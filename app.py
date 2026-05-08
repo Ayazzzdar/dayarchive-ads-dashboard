@@ -63,6 +63,27 @@ meta_importer = MetaImporter(db)
 hypothesis_engine = HypothesisEngine(db)
 recommendation_engine = RecommendationEngine(db)
 
+# Auto-import Meta data from Excel file in repo on startup
+if 'meta_data_imported' not in st.session_state:
+    performance_data = db.get_recent_performance(days=365)  # Check if any data exists
+    if len(performance_data) == 0:
+        # Database is empty - import from Excel
+        try:
+            import os
+            meta_file = 'Archive-Ads-Apr-1-2026-May-6-2026.xlsx'
+            
+            if os.path.exists(meta_file):
+                result = meta_importer.import_excel(meta_file)
+                st.session_state['meta_data_imported'] = True
+                st.toast(f"✅ Auto-loaded {result['rows_imported']} Meta performance rows from Excel!", icon="📊")
+            else:
+                st.session_state['meta_data_imported'] = False
+        except Exception as e:
+            st.session_state['meta_data_imported'] = False
+            # Silently fail if files aren't ready yet
+    else:
+        st.session_state['meta_data_imported'] = True
+
 # Sidebar
 st.sidebar.title("🎯 Navigation")
 page = st.sidebar.radio(
