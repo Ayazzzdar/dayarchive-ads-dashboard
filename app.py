@@ -426,7 +426,11 @@ elif page == "📈 Meta Performance":
     with tab2:
         st.subheader("Performance Data")
         
-        days = st.slider("Days to show", 1, 90, 30)
+        # Show total rows in database
+        all_performance = db.get_recent_performance(days=365)
+        st.metric("Total Rows in Database", len(all_performance))
+        
+        days = st.slider("Days to show", 1, 90, 60)  # Default to 60 to capture April data
         performance_data = db.get_recent_performance(days=days)
         
         if performance_data:
