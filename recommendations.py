@@ -12,8 +12,8 @@ class RecommendationEngine:
         self.CTR_TARGET = 1.5
         self.FATIGUE_IMPRESSION_THRESHOLD = 50000
     
-    def generate_recommendations(self) -> Dict:
-        """Generate comprehensive recommendations"""
+    def generate_recommendations(self, days: int = 30) -> Dict:
+        """Generate comprehensive recommendations based on specified date range"""
         
         recommendations = {
             'immediate_actions': [],
@@ -25,13 +25,15 @@ class RecommendationEngine:
             'debug': {}  # Add debug info
         }
         
-        # Get recent performance (30 days to ensure we catch all uploaded data)
-        recent_performance = self.db.get_recent_performance(days=30)
+        # Get recent performance with custom date range
+        recent_performance = self.db.get_recent_performance(days=days)
         
         recommendations['debug']['performance_rows'] = len(recent_performance) if recent_performance else 0
+        recommendations['debug']['days_analyzed'] = days
+        recommendations['debug']['date_range'] = f"Last {days} days"
         
         if not recent_performance:
-            recommendations['debug']['message'] = "No Meta performance data in last 7 days"
+            recommendations['debug']['message'] = f"No Meta performance data in last {days} days"
             return recommendations
         
         # Analyze each creative
