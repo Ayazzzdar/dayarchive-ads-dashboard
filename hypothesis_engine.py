@@ -6,7 +6,7 @@ class HypothesisEngine:
         self.db = database
         
         # Validation thresholds
-        self.ROAS_THRESHOLD_VALIDATED = 3.0
+        self.ROAS_THRESHOLD_VALIDATED = 2.0  # Changed from 3.0 to 2.0
         self.ROAS_THRESHOLD_INVALIDATED = 1.0
         self.MIN_DAYS_RUNNING = 7  # Changed from 10 conversions to 7 days
     
@@ -35,6 +35,7 @@ class HypothesisEngine:
         # Calculate ROAS
         roas = performance['revenue'] / performance['spend'] if performance['spend'] > 0 else 0
         conversions = performance['conversions']
+        spend = performance['spend']
         
         # Check how long it's been running
         launch_date = creative.get('launch_date')
@@ -47,31 +48,47 @@ class HypothesisEngine:
         else:
             days_running = 0
         
-        # Determine conclusion based on 7 days minimum
+        # EARLY PERFORMANCE INDICATORS (before 7 days)
         if days_running < self.MIN_DAYS_RUNNING:
-            conclusion = "Inconclusive"
-            actual_result = f"Only running for {days_running} days. Need {self.MIN_DAYS_RUNNING} days minimum for validation."
-            learnings = "Continue running to gather more data."
-            next_test = "Wait until 7 days have passed before making decisions."
+            # Show early signals based on ROAS
+            if roas >= 2.0:
+                conclusion = "Early Winner 🔥"
+                actual_result = f"After {days_running} days: ROAS of {roas:.2f}x with {conversions} conversions and ${spend:.2f} spend. STRONG EARLY SIGNAL - This is working!"
+                learnings = f"✅ EARLY WIN: Above 2x ROAS after {days_running} days. This angle/format is resonating. Monitor closely and prepare to scale at day 7."
+                next_test = f"Continue running. If ROAS holds above 2x through day 7, scale immediately. Consider creating variations of this winning angle."
+            
+            elif roas >= 1.5:
+                conclusion = "Promising Signal 📊"
+                actual_result = f"After {days_running} days: ROAS of {roas:.2f}x with {conversions} conversions and ${spend:.2f} spend. Profitable with room to improve."
+                learnings = f"📈 LEARNING OPPORTUNITY: Between 1.5-2x ROAS. Something is working. Review hypothesis - which element is performing? Consider iterating on: headline, image, angle, or offer."
+                next_test = f"Continue to day 7. Analyze what's working: Is it the {creative.get('angle', 'angle')}? The {creative.get('format', 'format')}? Create 2-3 variations testing individual elements."
+            
+            else:
+                conclusion = "Inconclusive (Early)"
+                actual_result = f"After {days_running} days: ROAS of {roas:.2f}x with {conversions} conversions. Need {self.MIN_DAYS_RUNNING} days minimum for validation."
+                learnings = f"⏳ TOO EARLY: Only {days_running} days running. Continue to day 7 before making decisions."
+                next_test = "Wait until 7 days have passed before making decisions."
         
-        elif roas >= self.ROAS_THRESHOLD_VALIDATED:
-            conclusion = "Validated"
-            actual_result = f"After {days_running} days: ROAS of {roas:.2f}x with {conversions} conversions confirms hypothesis."
-            learnings = self.extract_learnings_from_winner(creative, performance)
-            next_test = self.suggest_next_test_from_winner(creative, performance)
-        
-        elif roas < self.ROAS_THRESHOLD_INVALIDATED:
-            conclusion = "Invalidated"
-            actual_result = f"After {days_running} days: ROAS of {roas:.2f}x with {conversions} conversions. Hypothesis did not hold."
-            learnings = self.extract_learnings_from_loser(creative, performance)
-            next_test = self.suggest_next_test_from_loser(creative, performance)
-        
+        # FULL VALIDATION (7+ days)
         else:
-            # Between 1.0x and 3.0x
-            conclusion = "Partially Validated"
-            actual_result = f"After {days_running} days: ROAS of {roas:.2f}x with {conversions} conversions. Profitable but below target."
-            learnings = "Creative is working but has room for improvement."
-            next_test = "Test variations of this creative to optimize performance."
+            if roas >= self.ROAS_THRESHOLD_VALIDATED:
+                conclusion = "Validated ✅"
+                actual_result = f"After {days_running} days: ROAS of {roas:.2f}x with {conversions} conversions confirms hypothesis."
+                learnings = self.extract_learnings_from_winner(creative, performance)
+                next_test = self.suggest_next_test_from_winner(creative, performance)
+            
+            elif roas < self.ROAS_THRESHOLD_INVALIDATED:
+                conclusion = "Invalidated ❌"
+                actual_result = f"After {days_running} days: ROAS of {roas:.2f}x with {conversions} conversions. Hypothesis did not hold."
+                learnings = self.extract_learnings_from_loser(creative, performance)
+                next_test = self.suggest_next_test_from_loser(creative, performance)
+            
+            else:
+                # Between 1.0x and 2.0x
+                conclusion = "Partially Validated ⚠️"
+                actual_result = f"After {days_running} days: ROAS of {roas:.2f}x with {conversions} conversions. Profitable but below 2.0x target."
+                learnings = "Creative is profitable (above 1.0x) but not hitting the 2.0x validation threshold. Some elements are working, others need optimization."
+                next_test = "Test variations to push this above 2.0x. Focus on: improving hook rate, strengthening CTA, or testing different angle/format combinations."
         
         # Save to database
         self.db.save_hypothesis_result(
