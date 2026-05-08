@@ -40,7 +40,20 @@ class RecommendationEngine:
         adset_stats = self.aggregate_by_adset(recent_performance)
         
         recommendations['debug']['adsets_found'] = len(adset_stats)
-        recommendations['debug']['adset_names'] = list(adset_stats.keys())[:5]  # First 5
+        recommendations['debug']['adset_names'] = list(adset_stats.keys())[:10]  # First 10
+        recommendations['debug']['sample_stats'] = {}
+        
+        # Show first 3 ad sets with their stats for debugging
+        for i, (ad_set_name, stats) in enumerate(list(adset_stats.items())[:3]):
+            roas = stats['revenue'] / stats['spend'] if stats['spend'] > 0 else 0
+            recommendations['debug']['sample_stats'][ad_set_name] = {
+                'spend': round(stats['spend'], 2),
+                'revenue': round(stats['revenue'], 2),
+                'roas': round(roas, 2),
+                'conversions': stats['conversions']
+            }
+        
+        recommendations['debug']['scale_evaluation'] = []
         
         for ad_set_name, stats in adset_stats.items():
             roas = stats['revenue'] / stats['spend'] if stats['spend'] > 0 else 0
@@ -52,12 +65,26 @@ class RecommendationEngine:
             
             # Check days running
             days_running = 0
+            launch_date = None
             if creative and creative.get('launch_date'):
                 try:
                     launch_dt = datetime.strptime(creative['launch_date'], '%Y-%m-%d')
                     days_running = (datetime.now() - launch_dt).days
+                    launch_date = creative['launch_date']
                 except:
                     days_running = 0
+            
+            # Debug: Track first 5 for scale evaluation
+            if len(recommendations['debug']['scale_evaluation']) < 5:
+                recommendations['debug']['scale_evaluation'].append({
+                    'ad_set': ad_set_name,
+                    'roas': round(roas, 2),
+                    'days_running': days_running,
+                    'launch_date': launch_date,
+                    'meets_roas': roas >= self.ROAS_TARGET,
+                    'meets_days': days_running >= self.MIN_DAYS,
+                    'reason': f"ROAS: {roas:.2f} ({'✅' if roas >= self.ROAS_TARGET else '❌'}), Days: {days_running} ({'✅' if days_running >= self.MIN_DAYS else '❌'})"
+                })
             
             # Scale opportunities (2.0x+ ROAS after 7 days)
             if roas >= self.ROAS_TARGET and days_running >= self.MIN_DAYS:
