@@ -21,17 +21,24 @@ class RecommendationEngine:
             'pause_recommendations': [],
             'next_tests': [],
             'winning_patterns': {},
-            'budget_optimization': {}
+            'budget_optimization': {},
+            'debug': {}  # Add debug info
         }
         
         # Get recent performance
         recent_performance = self.db.get_recent_performance(days=7)
         
+        recommendations['debug']['performance_rows'] = len(recent_performance) if recent_performance else 0
+        
         if not recent_performance:
+            recommendations['debug']['message'] = "No Meta performance data in last 7 days"
             return recommendations
         
         # Analyze each creative
         adset_stats = self.aggregate_by_adset(recent_performance)
+        
+        recommendations['debug']['adsets_found'] = len(adset_stats)
+        recommendations['debug']['adset_names'] = list(adset_stats.keys())[:5]  # First 5
         
         for ad_set_name, stats in adset_stats.items():
             roas = stats['revenue'] / stats['spend'] if stats['spend'] > 0 else 0
