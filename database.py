@@ -207,6 +207,18 @@ class Database:
             return dict(row)
         return None
     
+    def update_creative_learnings(self, creative_id: int, learnings: str):
+        """Update learnings for a creative test"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE creative_tests 
+            SET learnings = ?
+            WHERE id = ?
+        ''', (learnings, creative_id))
+        conn.commit()
+        conn.close()
+    
     def update_creative_status(self, creative_id: int, status: str):
         """Update creative status"""
         conn = self.get_connection()
