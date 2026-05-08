@@ -107,10 +107,7 @@ class ShopifyConnector:
         """
         Extract UTM parameters from order
         
-        Shopify 2024-01+ API stores UTM params in multiple places:
-        1. customer_journey_summary.last_visit.utm_parameters (most reliable)
-        2. client_details fields
-        3. landing_site_ref (fallback)
+        Shopify stores UTM params in landing_site_ref (older API) or landing_site
         """
         utm_params = {
             'utm_source': None,
@@ -120,43 +117,37 @@ class ShopifyConnector:
             'utm_term': None
         }
         
-        # Try customer_journey_summary first (Shopify 2024-01+ API)
-        customer_journey = order.get('customer_journey_summary')
-        if customer_journey and customer_journey.get('last_visit'):
-            last_visit = customer_journey['last_visit']
-            
-            # Extract from utm_parameters object
-            if 'utm_parameters' in last_visit:
-                utm_data = last_visit['utm_parameters']
-                utm_params['utm_source'] = utm_data.get('utm_source')
-                utm_params['utm_medium'] = utm_data.get('utm_medium')
-                utm_params['utm_campaign'] = utm_data.get('utm_campaign')
-                utm_params['utm_content'] = utm_data.get('utm_content')
-                utm_params['utm_term'] = utm_data.get('utm_term')
-                
-                if any(v is not None for v in utm_params.values()):
-                    return utm_params
-            
-            # Fallback: parse from landing_site in last_visit
-            landing_site = last_visit.get('landing_site')
-            if landing_site and '?' in landing_site:
-                return self._parse_utm_from_url(landing_site)
+        # Try landing_site_ref first (this is what your API has!)
+        landing_site_ref = order.get('landing_site_ref', '')
+        if landing_site_ref:
+            print(f"🔍 Parsing landing_site_ref: {landing_site_ref}")
+            parsed = self._parse_utm_from_url(landing_site_ref)
+            if any(v is not None for v in parsed.values()):
+                print(f"✅ Found UTMs in landing_site_ref: {parsed}")
+                return parsed
         
-        # Try client_details (alternative location)
-        client_details = order.get('client_details')
+        # Try landing_site
+        landing_site = order.get('landing_site', '')
+        if landing_site:
+            print(f"🔍 Parsing landing_site: {landing_site}")
+            parsed = self._parse_utm_from_url(landing_site)
+            if any(v is not None for v in parsed.values()):
+                print(f"✅ Found UTMs in landing_site: {parsed}")
+                return parsed
+        
+        # Try client_details
+        client_details = order.get('client_details', {})
         if client_details:
+            print(f"🔍 Checking client_details: {client_details.keys() if client_details else 'None'}")
             for key in ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']:
                 if key in client_details:
                     utm_params[key] = client_details[key]
             
             if any(v is not None for v in utm_params.values()):
+                print(f"✅ Found UTMs in client_details: {utm_params}")
                 return utm_params
         
-        # Fallback: landing_site_ref (older API)
-        landing_site_ref = order.get('landing_site_ref', '')
-        if landing_site_ref:
-            return self._parse_utm_from_url(landing_site_ref)
-        
+        print(f"❌ No UTMs found in order")
         return utm_params
     
     def _parse_utm_from_url(self, url: str) -> Dict:
@@ -249,6 +240,14 @@ class ShopifyConnector:
             # Try to extract UTMs from first order
             utm_test = self.extract_utm_params(first_order)
             debug_info['utm_extraction_test'] = utm_test
+            
+            # Also show what's actually in the fields we're trying to read
+            debug_info['landing_site_ref_value'] = first_order.get('landing_site_ref')
+            debug_info['landing_site_value'] = first_order.get('landing_site')
+            debug_info['referring_site_value'] = first_order.get('referring_site')
+            
+            if first_order.get('client_details'):
+                debug_info['client_details_keys'] = list(first_order['client_details'].keys())
         
         for order in orders:
             # Extract order details
