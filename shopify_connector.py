@@ -47,19 +47,35 @@ class ShopifyConnector:
         params = {
             'status': status,
             'created_at_min': created_at_min,
-            'limit': 250,  # Max per page
-            # Request customer_journey_summary explicitly
-            'fields': 'id,order_number,created_at,total_price,customer,customer_journey_summary,client_details,landing_site,landing_site_ref,referring_site'
+            'limit': 5  # Just get 5 orders for testing
+            # Don't specify fields - get EVERYTHING
         }
         
         all_orders = []
         
         try:
             response = requests.get(url, headers=self.get_headers(), params=params, timeout=30)
+            
+            print(f"📡 API Call: {url}")
+            print(f"📊 Status Code: {response.status_code}")
+            
+            if response.status_code != 200:
+                print(f"❌ Error: {response.text}")
+                return []
+            
             response.raise_for_status()
             
             data = response.json()
             orders = data.get('orders', [])
+            
+            # DEBUG: Print all fields from first order
+            if orders:
+                first = orders[0]
+                print(f"\n=== First Order Fields ===")
+                print(f"Order #{first.get('order_number')}")
+                print(f"All top-level fields: {list(first.keys())}")
+                print(f"=========================\n")
+            
             all_orders.extend(orders)
             
             # Handle pagination if needed
