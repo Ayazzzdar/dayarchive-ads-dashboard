@@ -312,7 +312,7 @@ elif page == "🎨 Creative Tracker":
             if avatar_filter != "All":
                 df = df[df['avatar'] == avatar_filter]
             
-            # Display all columns
+            # Display all columns with scrolling
             # Reorder columns to put most important ones first
             column_order = [
                 'launch_date', 'ad_set_name', 'campaign', 'status',
@@ -325,9 +325,12 @@ elif page == "🎨 Creative Tracker":
             # Only include columns that exist in the dataframe
             display_columns = [col for col in column_order if col in df.columns]
             
+            # Display with scrolling enabled
             st.dataframe(
                 df[display_columns],
-                width="stretch", hide_index=True
+                height=600,  # Fixed height with vertical scroll
+                use_container_width=True,  # Full width with horizontal scroll
+                hide_index=True
             )
             
             # Edit status
