@@ -25,8 +25,8 @@ class RecommendationEngine:
             'debug': {}  # Add debug info
         }
         
-        # Get recent performance
-        recent_performance = self.db.get_recent_performance(days=7)
+        # Get recent performance (30 days to ensure we catch all uploaded data)
+        recent_performance = self.db.get_recent_performance(days=30)
         
         recommendations['debug']['performance_rows'] = len(recent_performance) if recent_performance else 0
         
