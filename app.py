@@ -243,25 +243,53 @@ elif page == "🎨 Creative Tracker":
             # Re-import button if there are placeholders
             if placeholders > 0:
                 st.warning(f"⚠️ {placeholders} creative tests have placeholder data. Re-import from Excel to get full details.")
-                if st.button("🔄 Re-import from Excel (will replace placeholders)"):
-                    with st.spinner("Re-importing..."):
-                        try:
-                            import import_historical_data as importer
-                            import os
-                            
-                            creative_file = 'Creative_Hit_Rate_Tracker___The_Day_Archive___2026_.xlsx'
-                            
-                            if os.path.exists(creative_file):
-                                # Clear existing data first
-                                db.clear_all_data()
-                                # Re-import
-                                creatives_imported = importer.import_creative_tracker(creative_file, db)
-                                st.success(f"✅ Re-imported {creatives_imported} creative tests with full data!")
-                                st.rerun()
-                            else:
-                                st.error("❌ Excel file not found. Make sure 'Creative_Hit_Rate_Tracker___The_Day_Archive___2026_.xlsx' is in the repo.")
-                        except Exception as e:
-                            st.error(f"❌ Import error: {str(e)}")
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    if st.button("🔄 Re-import from Excel", use_container_width=True):
+                        with st.spinner("Re-importing from Excel..."):
+                            try:
+                                import import_historical_data as importer
+                                import os
+                                
+                                creative_file = 'Creative_Hit_Rate_Tracker___The_Day_Archive___2026_.xlsx'
+                                
+                                # Check if file exists
+                                if not os.path.exists(creative_file):
+                                    st.error(f"❌ File not found: {creative_file}")
+                                    st.info("Current directory files:")
+                                    st.code("\n".join(os.listdir('.')))
+                                else:
+                                    # Clear existing data first
+                                    st.info("Clearing old data...")
+                                    db.clear_all_data()
+                                    
+                                    # Re-import
+                                    st.info("Importing from Excel...")
+                                    creatives_imported = importer.import_creative_tracker(creative_file, db)
+                                    
+                                    st.success(f"✅ Re-imported {creatives_imported} creative tests with full data!")
+                                    st.balloons()
+                                    
+                                    # Force refresh
+                                    st.session_state['creative_tracker_imported'] = True
+                                    st.rerun()
+                                    
+                            except Exception as e:
+                                st.error(f"❌ Import error: {str(e)}")
+                                import traceback
+                                st.code(traceback.format_exc())
+                
+                with col2:
+                    if st.button("🗑️ Clear Placeholders Only", use_container_width=True):
+                        # Delete only the placeholder creatives
+                        for creative in creatives:
+                            if creative.get('hypothesis') == 'Imported from Meta data - add details later':
+                                # This is a placeholder - we could delete it
+                                pass
+                        st.info("Feature coming soon - use Re-import button to replace all")
+
             
             st.markdown("---")
             
@@ -561,14 +589,37 @@ elif page == "⚙️ Settings":
             st.info("✅ Shopify Connected")
             
             if st.button("📥 Import Last 30 Days Orders"):
-                st.warning("⚠️ Connect your existing Shopify API module from your research dashboard to enable order imports.")
-                st.code("""
-# In your Shopify connector:
-from shopify_connector import ShopifyConnector
-
-connector = ShopifyConnector(shop_url, access_token, db)
-result = connector.import_orders_to_database(days_back=30)
-                """)
+                with st.spinner("Importing orders from Shopify..."):
+                    try:
+                        from shopify_connector import ShopifyConnector
+                        
+                        shop_url = st.session_state.get('shopify_url')
+                        access_token = st.session_state.get('shopify_token')
+                        
+                        if not shop_url or not access_token:
+                            st.error("❌ Please save Shopify credentials first")
+                        else:
+                            # Initialize connector
+                            connector = ShopifyConnector(shop_url, access_token, db)
+                            
+                            # Import orders
+                            result = connector.import_orders_to_database(days_back=30)
+                            
+                            st.success(f"""
+                            ✅ Imported {result['orders_imported']} orders!
+                            - Matched to ads: {result['matched_to_ads']}
+                            - Unmatched: {result['unmatched']}
+                            - Total revenue: ${result['total_revenue']:,.2f}
+                            - Match rate: {result['match_rate']:.1f}%
+                            """)
+                            
+                            st.info("Go to 'Shopify Revenue' tab to see attribution!")
+                    
+                    except ImportError:
+                        st.error("❌ shopify_connector.py not found. Make sure it's in your GitHub repo.")
+                    except Exception as e:
+                        st.error(f"❌ Shopify import error: {str(e)}")
+                        st.caption("Check that your access token has 'read_orders' and 'read_customers' scopes.")
     
     with tab2:
         st.subheader("Claude API (for Creative Analysis)")
