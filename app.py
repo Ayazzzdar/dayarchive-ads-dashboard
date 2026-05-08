@@ -35,21 +35,29 @@ def get_database():
 
 db = get_database()
 
-# Auto-import creative tracker if database is empty (first-time setup)
-if 'setup_complete' not in st.session_state:
+# Auto-import creative tracker on first load if database is empty
+if 'creative_tracker_imported' not in st.session_state:
     creatives = db.get_all_creative_tests()
     if len(creatives) == 0:
-        # Database is empty - run first-time import
+        # Database is empty - import from Excel
         try:
             import import_historical_data as importer
+            import os
+            
             creative_file = 'Creative_Hit_Rate_Tracker___The_Day_Archive___2026_.xlsx'
-            importer.import_creative_tracker(creative_file, db)
-            st.session_state['setup_complete'] = True
-            st.success("✅ Creative Tracker loaded automatically!")
-        except:
-            pass  # Files might not be uploaded yet
+            
+            if os.path.exists(creative_file):
+                # Import the actual Excel file with all data
+                creatives_imported = importer.import_creative_tracker(creative_file, db)
+                st.session_state['creative_tracker_imported'] = True
+                st.toast(f"✅ Auto-loaded {creatives_imported} creative tests from Excel!", icon="🎉")
+            else:
+                st.session_state['creative_tracker_imported'] = False
+        except Exception as e:
+            st.session_state['creative_tracker_imported'] = False
+            # Silently fail if files aren't ready yet
     else:
-        st.session_state['setup_complete'] = True
+        st.session_state['creative_tracker_imported'] = True
 
 meta_importer = MetaImporter(db)
 hypothesis_engine = HypothesisEngine(db)
@@ -221,6 +229,42 @@ elif page == "🎨 Creative Tracker":
         creatives = db.get_all_creative_tests()
         
         if creatives:
+            # Show import status
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total Creative Tests", len(creatives))
+            with col2:
+                with_data = len([c for c in creatives if c.get('hypothesis') and c.get('hypothesis') != 'Imported from Meta data - add details later'])
+                st.metric("With Full Data", with_data)
+            with col3:
+                placeholders = len(creatives) - with_data
+                st.metric("Placeholders", placeholders)
+            
+            # Re-import button if there are placeholders
+            if placeholders > 0:
+                st.warning(f"⚠️ {placeholders} creative tests have placeholder data. Re-import from Excel to get full details.")
+                if st.button("🔄 Re-import from Excel (will replace placeholders)"):
+                    with st.spinner("Re-importing..."):
+                        try:
+                            import import_historical_data as importer
+                            import os
+                            
+                            creative_file = 'Creative_Hit_Rate_Tracker___The_Day_Archive___2026_.xlsx'
+                            
+                            if os.path.exists(creative_file):
+                                # Clear existing data first
+                                db.clear_all_data()
+                                # Re-import
+                                creatives_imported = importer.import_creative_tracker(creative_file, db)
+                                st.success(f"✅ Re-imported {creatives_imported} creative tests with full data!")
+                                st.rerun()
+                            else:
+                                st.error("❌ Excel file not found. Make sure 'Creative_Hit_Rate_Tracker___The_Day_Archive___2026_.xlsx' is in the repo.")
+                        except Exception as e:
+                            st.error(f"❌ Import error: {str(e)}")
+            
+            st.markdown("---")
+            
             df = pd.DataFrame(creatives)
             
             # Filters
