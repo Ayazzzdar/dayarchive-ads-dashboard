@@ -380,6 +380,11 @@ elif page == "📈 Meta Performance":
                 
                 st.success(f"✅ Imported {result['rows_imported']} rows!")
                 
+                if result.get('errors'):
+                    st.error(f"⚠️ {len(result['errors'])} rows failed to import:")
+                    for error in result['errors']:
+                        st.write(f"  • {error}")
+                
                 if result['matched_to_creative_tracker'] > 0:
                     st.info(f"🔗 Matched {result['matched_to_creative_tracker']} to creative tracker")
                 
