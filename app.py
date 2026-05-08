@@ -584,21 +584,32 @@ elif page == "💡 Recommendations":
     
     recommendations = recommendation_engine.generate_recommendations()
     
-    if recommendations:
-        # Scale Opportunities
-        if recommendations.get('scale_opportunities'):
-            st.subheader("📈 Scale These Now")
-            for opp in recommendations['scale_opportunities']:
-                st.success(f"**{opp['ad_set_name']}**: {opp['reason']} - {opp['recommendation']}")
-        
-        # Pause Recommendations
-        if recommendations.get('pause_recommendations'):
-            st.subheader("⏸️ Consider Pausing")
-            for pause in recommendations['pause_recommendations']:
-                st.warning(f"**{pause['ad_set_name']}**: {pause['reason']}")
-        
-        # Next Tests
-        st.subheader("🧪 What to Test Next")
+    # Debug info
+    with st.expander("🔍 Debug Info"):
+        st.write("Recommendations returned:", recommendations)
+        st.write("Scale opportunities:", len(recommendations.get('scale_opportunities', [])))
+        st.write("Pause recommendations:", len(recommendations.get('pause_recommendations', [])))
+        st.write("Next tests:", len(recommendations.get('next_tests', [])))
+    
+    # Scale Opportunities
+    st.subheader("📈 Scale These Now")
+    if recommendations.get('scale_opportunities'):
+        for opp in recommendations['scale_opportunities']:
+            st.success(f"**{opp['ad_set_name']}**: {opp['reason']} - {opp['recommendation']}")
+    else:
+        st.info("No scale opportunities yet. Keep testing until you hit 2.0x+ ROAS after 7 days!")
+    
+    # Pause Recommendations  
+    st.subheader("⏸️ Consider Pausing")
+    if recommendations.get('pause_recommendations'):
+        for pause in recommendations['pause_recommendations']:
+            st.warning(f"**{pause['ad_set_name']}**: {pause['reason']}")
+    else:
+        st.info("No ads to pause. Keep running tests!")
+    
+    # Next Tests
+    st.subheader("🧪 What to Test Next")
+    if recommendations.get('next_tests'):
         for test in recommendations.get('next_tests', []):
             with st.expander(f"Test: {test['concept']}", expanded=True):
                 st.write(f"**Format:** {test['format']}")
@@ -606,23 +617,25 @@ elif page == "💡 Recommendations":
                 st.write(f"**Hypothesis:** {test['hypothesis']}")
                 st.write(f"**Why:** {test['reasoning']}")
                 st.write(f"**Predicted ROAS:** {test['predicted_roas']}")
-        
-        # Winning Patterns
-        if recommendations.get('winning_patterns'):
-            st.subheader("🏆 Your Winning Pattern DNA")
-            patterns = recommendations['winning_patterns']
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                st.markdown("**What's Working:**")
-                for pattern in patterns.get('working', []):
-                    st.markdown(f"✅ {pattern}")
-            with col2:
-                st.markdown("**What's Not:**")
-                for pattern in patterns.get('not_working', []):
-                    st.markdown(f"❌ {pattern}")
     else:
-        st.info("Not enough data yet. Add creatives and Meta performance!")
+        st.info("Next test suggestions will appear here once you have validated winners!")
+    
+    # Winning Patterns
+    st.subheader("🏆 Your Winning Pattern DNA")
+    if recommendations.get('winning_patterns'):
+        patterns = recommendations['winning_patterns']
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**What's Working:**")
+            for pattern in patterns.get('working', []):
+                st.markdown(f"✅ {pattern}")
+        with col2:
+            st.markdown("**What's Not:**")
+            for pattern in patterns.get('not_working', []):
+                st.markdown(f"❌ {pattern}")
+    else:
+        st.info("Winning patterns will be identified once you have validated creatives!")
 
 # ============================================================================
 # PAGE: SETTINGS
