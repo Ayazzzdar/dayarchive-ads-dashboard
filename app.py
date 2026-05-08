@@ -312,9 +312,21 @@ elif page == "🎨 Creative Tracker":
             if avatar_filter != "All":
                 df = df[df['avatar'] == avatar_filter]
             
-            # Display
+            # Display all columns
+            # Reorder columns to put most important ones first
+            column_order = [
+                'launch_date', 'ad_set_name', 'campaign', 'status',
+                'variable_tested', 'format', 'desire', 'angle', 'avatar', 'awareness_level',
+                'hypothesis', 'results', 'learnings',
+                'creative_type', 'landing_page', 'ad_inspiration', 
+                'experiences', 'emotional_desire', 'beliefs', 'behaviors', 'variations'
+            ]
+            
+            # Only include columns that exist in the dataframe
+            display_columns = [col for col in column_order if col in df.columns]
+            
             st.dataframe(
-                df[['launch_date', 'ad_set_name', 'campaign', 'variable_tested', 'angle', 'status']],
+                df[display_columns],
                 width="stretch", hide_index=True
             )
             
