@@ -1,5 +1,5 @@
 from typing import List, Dict
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class HypothesisEngine:
     def __init__(self, database):
@@ -8,7 +8,7 @@ class HypothesisEngine:
         # Validation thresholds
         self.ROAS_THRESHOLD_VALIDATED = 3.0
         self.ROAS_THRESHOLD_INVALIDATED = 1.0
-        self.MIN_CONVERSIONS = 10
+        self.MIN_DAYS_RUNNING = 7  # Changed from 10 conversions to 7 days
     
     def validate_all_hypotheses(self) -> List[Dict]:
         """Validate all creative hypotheses against actual performance"""
@@ -36,29 +36,40 @@ class HypothesisEngine:
         roas = performance['revenue'] / performance['spend'] if performance['spend'] > 0 else 0
         conversions = performance['conversions']
         
-        # Determine conclusion
-        if conversions < self.MIN_CONVERSIONS:
+        # Check how long it's been running
+        launch_date = creative.get('launch_date')
+        if launch_date:
+            try:
+                launch_dt = datetime.strptime(launch_date, '%Y-%m-%d')
+                days_running = (datetime.now() - launch_dt).days
+            except:
+                days_running = 0
+        else:
+            days_running = 0
+        
+        # Determine conclusion based on 7 days minimum
+        if days_running < self.MIN_DAYS_RUNNING:
             conclusion = "Inconclusive"
-            actual_result = f"Only {conversions} conversions so far. Need {self.MIN_CONVERSIONS} for statistical significance."
+            actual_result = f"Only running for {days_running} days. Need {self.MIN_DAYS_RUNNING} days minimum for validation."
             learnings = "Continue running to gather more data."
-            next_test = "Wait for more conversions before making decisions."
+            next_test = "Wait until 7 days have passed before making decisions."
         
         elif roas >= self.ROAS_THRESHOLD_VALIDATED:
             conclusion = "Validated"
-            actual_result = f"ROAS of {roas:.2f}x with {conversions} conversions confirms hypothesis."
+            actual_result = f"After {days_running} days: ROAS of {roas:.2f}x with {conversions} conversions confirms hypothesis."
             learnings = self.extract_learnings_from_winner(creative, performance)
             next_test = self.suggest_next_test_from_winner(creative, performance)
         
         elif roas < self.ROAS_THRESHOLD_INVALIDATED:
             conclusion = "Invalidated"
-            actual_result = f"ROAS of {roas:.2f}x with {conversions} conversions. Hypothesis did not hold."
+            actual_result = f"After {days_running} days: ROAS of {roas:.2f}x with {conversions} conversions. Hypothesis did not hold."
             learnings = self.extract_learnings_from_loser(creative, performance)
             next_test = self.suggest_next_test_from_loser(creative, performance)
         
         else:
             # Between 1.0x and 3.0x
             conclusion = "Partially Validated"
-            actual_result = f"ROAS of {roas:.2f}x with {conversions} conversions. Profitable but below target."
+            actual_result = f"After {days_running} days: ROAS of {roas:.2f}x with {conversions} conversions. Profitable but below target."
             learnings = "Creative is working but has room for improvement."
             next_test = "Test variations of this creative to optimize performance."
         
