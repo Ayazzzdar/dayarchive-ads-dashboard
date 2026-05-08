@@ -488,6 +488,10 @@ elif page == "🔬 Hypothesis Validation":
     validations = hypothesis_engine.validate_all_hypotheses()
     
     if validations:
+        # Filter selector
+        if 'validation_filter' not in st.session_state:
+            st.session_state['validation_filter'] = 'All'
+        
         col1, col2, col3, col4, col5 = st.columns(5)
         
         # Count by conclusion type (handle emojis and variations)
@@ -497,22 +501,41 @@ elif page == "🔬 Hypothesis Validation":
         early_winner = sum(1 for v in validations if 'Early Winner' in v['conclusion'])
         promising = sum(1 for v in validations if 'Promising Signal' in v['conclusion'])
         
+        # Clickable metric buttons
         with col1:
-            st.metric("✅ Validated", validated)
+            if st.button(f"✅ Validated\n{validated}", key="filter_validated", use_container_width=True):
+                st.session_state['validation_filter'] = 'Validated ✅'
+                st.rerun()
         with col2:
-            st.metric("🔥 Early Winners", early_winner)
+            if st.button(f"🔥 Early Winners\n{early_winner}", key="filter_early", use_container_width=True):
+                st.session_state['validation_filter'] = 'Early Winner'
+                st.rerun()
         with col3:
-            st.metric("📊 Promising", promising)
+            if st.button(f"📊 Promising\n{promising}", key="filter_promising", use_container_width=True):
+                st.session_state['validation_filter'] = 'Promising Signal'
+                st.rerun()
         with col4:
-            st.metric("⚠️ Partial", partially)
+            if st.button(f"⚠️ Partial\n{partially}", key="filter_partial", use_container_width=True):
+                st.session_state['validation_filter'] = 'Partially Validated'
+                st.rerun()
         with col5:
-            st.metric("Total Tests", len(validations))
+            if st.button(f"📋 All Tests\n{len(validations)}", key="filter_all", use_container_width=True):
+                st.session_state['validation_filter'] = 'All'
+                st.rerun()
+        
+        # Show current filter
+        if st.session_state['validation_filter'] != 'All':
+            st.info(f"🔍 Filtering: {st.session_state['validation_filter']} (click 'All Tests' to clear)")
+        
+        # Apply filter
+        if st.session_state['validation_filter'] != 'All':
+            validations = [v for v in validations if st.session_state['validation_filter'] in v['conclusion']]
         
         st.markdown("---")
         
         for v in validations:
             with st.expander(f"{v['ad_set_name']} - {v['conclusion']}", 
-                           expanded=(v['conclusion'] == 'Validated')):
+                           expanded=(v['conclusion'] == 'Validated ✅')):
                 col1, col2 = st.columns([2, 1])
                 
                 with col1:
@@ -520,9 +543,27 @@ elif page == "🔬 Hypothesis Validation":
                     st.write(v['hypothesis'])
                     st.markdown("**Actual Result:**")
                     st.write(v['actual_result'])
-                    if v['learnings']:
-                        st.markdown("**Learnings:**")
-                        st.write(v['learnings'])
+                    
+                    st.markdown("**Learnings:**")
+                    # Editable learnings text box
+                    current_learnings = v.get('learnings', '')
+                    new_learnings = st.text_area(
+                        "Update learnings (these feed into AI recommendations):",
+                        value=current_learnings,
+                        height=100,
+                        key=f"learnings_{v['ad_set_name']}",
+                        help="Add your observations, insights, or what you learned from this test. This helps Claude provide better recommendations."
+                    )
+                    
+                    # Save button
+                    if st.button("💾 Save Learnings", key=f"save_learnings_{v['ad_set_name']}"):
+                        # Update learnings in database
+                        creative = db.get_creative_by_adset_name(v['ad_set_name'])
+                        if creative:
+                            db.update_creative_learnings(creative['id'], new_learnings)
+                            st.success("✅ Learnings saved!")
+                            st.rerun()
+                    
                     if v['next_test']:
                         st.info(f"**Next:** {v['next_test']}")
                 
