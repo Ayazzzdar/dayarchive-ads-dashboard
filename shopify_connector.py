@@ -208,23 +208,31 @@ class ShopifyConnector:
         """
         orders = self.fetch_orders(days_back=days_back)
         
-        # DEBUG: Print first order to see what we're getting
-        if orders:
-            print("\n=== DEBUG: First Order Fields ===")
-            first_order = orders[0]
-            print(f"Order #{first_order.get('order_number')}")
-            print(f"Available fields: {list(first_order.keys())}")
-            print(f"Has customer_journey_summary: {'customer_journey_summary' in first_order}")
-            
-            if 'customer_journey_summary' in first_order:
-                cj = first_order['customer_journey_summary']
-                print(f"customer_journey_summary: {cj}")
-            
-            print("=== END DEBUG ===\n")
-        
         imported = 0
         matched_to_ads = 0
         total_revenue = 0
+        
+        # Store debug info to return
+        debug_info = {}
+        
+        if orders:
+            # Capture first order structure for debugging
+            first_order = orders[0]
+            debug_info['order_number'] = first_order.get('order_number')
+            debug_info['available_fields'] = list(first_order.keys())
+            debug_info['has_customer_journey_summary'] = 'customer_journey_summary' in first_order
+            debug_info['has_client_details'] = 'client_details' in first_order
+            debug_info['has_landing_site_ref'] = 'landing_site_ref' in first_order
+            
+            if 'customer_journey_summary' in first_order:
+                cj = first_order['customer_journey_summary']
+                debug_info['customer_journey_keys'] = list(cj.keys()) if cj else None
+                if cj and cj.get('last_visit'):
+                    debug_info['last_visit_keys'] = list(cj['last_visit'].keys())
+            
+            # Try to extract UTMs from first order
+            utm_test = self.extract_utm_params(first_order)
+            debug_info['utm_extraction_test'] = utm_test
         
         for order in orders:
             # Extract order details
@@ -274,7 +282,8 @@ class ShopifyConnector:
             'matched_to_ads': matched_to_ads,
             'unmatched': imported - matched_to_ads,
             'total_revenue': total_revenue,
-            'match_rate': (matched_to_ads / imported * 100) if imported > 0 else 0
+            'match_rate': (matched_to_ads / imported * 100) if imported > 0 else 0,
+            'debug_info': debug_info  # Add debug info to return
         }
     
     def get_attribution_summary(self, days_back: int = 30) -> List[Dict]:
