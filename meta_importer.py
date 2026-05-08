@@ -55,7 +55,7 @@ class MetaImporter:
         
         for idx, row in df.iterrows():
             # Try to match ad set name to creative tracker
-            ad_set_name = str(row['Ad set name'])
+            ad_set_name = str(row['Ad set name']).strip()  # Strip whitespace!
             creative_match = self.db.get_creative_by_adset_name(ad_set_name)
             
             if creative_match:
@@ -65,8 +65,8 @@ class MetaImporter:
             self.db.add_performance_data(
                 reporting_starts=row['Reporting starts'],
                 reporting_ends=row.get('Reporting ends', row['Reporting starts']),
-                ad_name=str(row['Ad name']),
-                ad_set_name=ad_set_name,
+                ad_name=str(row['Ad name']).strip(),
+                ad_set_name=str(row['Ad set name']).strip(),  # Strip whitespace!
                 ad_delivery=str(row.get('Ad delivery', '')),
                 results=int(row.get('Results', 0)),
                 cost_per_results=float(row.get('Cost per results', 0)),
