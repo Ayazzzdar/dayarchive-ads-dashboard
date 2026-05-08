@@ -42,7 +42,7 @@ def import_creative_tracker(excel_file_path, db):
         try:
             db.add_creative_test(
                 campaign=str(row.get('Campaign', '')) if pd.notna(row.get('Campaign')) else None,
-                ad_set_name=str(row['Ad Set Name']),
+                ad_set_name=str(row['Ad Set Name']).strip(),  # Strip whitespace!
                 launch_date=launch_date,
                 creative_type=str(row.get('Creative Type', '')) if pd.notna(row.get('Creative Type')) else None,
                 landing_page=str(row.get('Landing Page ', '')) if pd.notna(row.get('Landing Page ')) else None,
