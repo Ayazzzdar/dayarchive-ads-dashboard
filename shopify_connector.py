@@ -47,8 +47,9 @@ class ShopifyConnector:
         params = {
             'status': status,
             'created_at_min': created_at_min,
-            'limit': 250  # Max per page
-            # Don't use 'fields' parameter - we need full order objects to get customer marketing data
+            'limit': 250,  # Max per page
+            # Request customer_journey_summary explicitly
+            'fields': 'id,order_number,created_at,total_price,customer,customer_journey_summary,client_details,landing_site,landing_site_ref,referring_site'
         }
         
         all_orders = []
@@ -206,6 +207,20 @@ class ShopifyConnector:
             Import summary statistics
         """
         orders = self.fetch_orders(days_back=days_back)
+        
+        # DEBUG: Print first order to see what we're getting
+        if orders:
+            print("\n=== DEBUG: First Order Fields ===")
+            first_order = orders[0]
+            print(f"Order #{first_order.get('order_number')}")
+            print(f"Available fields: {list(first_order.keys())}")
+            print(f"Has customer_journey_summary: {'customer_journey_summary' in first_order}")
+            
+            if 'customer_journey_summary' in first_order:
+                cj = first_order['customer_journey_summary']
+                print(f"customer_journey_summary: {cj}")
+            
+            print("=== END DEBUG ===\n")
         
         imported = 0
         matched_to_ads = 0
