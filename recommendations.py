@@ -6,9 +6,9 @@ class RecommendationEngine:
         self.db = database
         
         # Thresholds
-        self.ROAS_TARGET = 3.0
+        self.ROAS_TARGET = 2.0  # Changed from 3.0 to match validation
         self.ROAS_KILL_THRESHOLD = 1.0
-        self.MIN_CONVERSIONS = 10
+        self.MIN_DAYS = 7  # Changed from 10 conversions to 7 days
         self.CTR_TARGET = 1.5
         self.FATIGUE_IMPRESSION_THRESHOLD = 50000
     
@@ -38,22 +38,36 @@ class RecommendationEngine:
             conversions = stats['conversions']
             ctr = (stats['clicks'] / stats['impressions'] * 100) if stats['impressions'] > 0 else 0
             
-            # Scale opportunities
-            if roas >= self.ROAS_TARGET and conversions >= self.MIN_CONVERSIONS:
+            # Get creative details for this ad set
+            creative = self.db.get_creative_by_adset_name(ad_set_name)
+            
+            # Check days running
+            days_running = 0
+            if creative and creative.get('launch_date'):
+                try:
+                    launch_dt = datetime.strptime(creative['launch_date'], '%Y-%m-%d')
+                    days_running = (datetime.now() - launch_dt).days
+                except:
+                    days_running = 0
+            
+            # Scale opportunities (2.0x+ ROAS after 7 days)
+            if roas >= self.ROAS_TARGET and days_running >= self.MIN_DAYS:
                 recommendations['scale_opportunities'].append({
                     'ad_set_name': ad_set_name,
                     'roas': roas,
-                    'reason': f"{roas:.2f}x ROAS with {conversions} conversions",
-                    'recommendation': "Increase budget by 20-30%"
+                    'days_running': days_running,
+                    'reason': f"{roas:.2f}x ROAS after {days_running} days with {conversions} conversions",
+                    'recommendation': "SCALE: Increase budget by 20-30% immediately"
                 })
             
-            # Pause recommendations
-            elif roas < self.ROAS_KILL_THRESHOLD and conversions >= self.MIN_CONVERSIONS:
+            # Pause recommendations (below 1.0x after 7 days)
+            elif roas < self.ROAS_KILL_THRESHOLD and days_running >= self.MIN_DAYS:
                 recommendations['pause_recommendations'].append({
                     'ad_set_name': ad_set_name,
                     'roas': roas,
-                    'reason': f"Underperforming at {roas:.2f}x ROAS with {conversions} conversions",
-                    'recommendation': "Pause and analyze learnings"
+                    'days_running': days_running,
+                    'reason': f"Underperforming at {roas:.2f}x ROAS after {days_running} days - losing money",
+                    'recommendation': "PAUSE and analyze learnings"
                 })
             
             # Creative fatigue check
