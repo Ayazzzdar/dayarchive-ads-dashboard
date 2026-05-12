@@ -1,0 +1,45 @@
+"Reporting starts","Reporting ends","Ad name","Ad set name","Ad delivery",Results,"Result indicator","Cost per results",Impressions,"Ad set budget","Ad set budget type","Amount spent (AUD)","Link clicks","CTR (link click-through rate)","CPC (cost per link click) (AUD)","Adds to cart","Cost per add to cart (AUD)","Checkouts initiated","Cost per checkout initiated (AUD)",Purchases,"Cost per purchase (AUD)","Purchases conversion value","Purchase ROAS (return on ad spend)","CPM (cost per 1,000 impressions) (AUD)",AOV,CVR,Frequency,"Ad ID","Hook Rate","Hold Rate New"
+2026-05-12,2026-05-12,"C8 - Ad 3 - 28/4 (2:2)","Concept 8 - Native - 28/4 - (2:2)",active,,,,647,20,Daily,19.76,6,0.927357,3.293333,,,,,,,,,30.540958,,0,1.256311,6905173278977,0,0
+2026-05-12,2026-05-12,"C6 - Ad 2 - Variation 1 - 30/4","Concept 6 - Us vs Them - Variation V1 - 30/4",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6906421100777,,
+2026-05-12,2026-05-12,"C6 - Ad 2 - Variation 3 - 30/4","Concept 6 - Us vs Them - Variation V1 - 30/4",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6906422795577,,
+2026-05-12,2026-05-12,"C6 - Ad 2 - Variation 2 - 30/4","Concept 6 - Us vs Them - Variation V1 - 30/4",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6906422795777,,
+2026-05-12,2026-05-12,"C9 - Ad 1 - 30/4","Concept 9 - Video Walkthrough - 30/4",active,,,,744,20,Daily,20.64,16,2.150538,1.29,2,10.32,,,,,,,27.741935,,0,1.0319,6906858331177,0.22177419,0.06182796
+2026-05-12,2026-05-12,"C9 - Ad 2 - 30/4","Concept 9 - Video Walkthrough - 30/4",inactive,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6906933274977,,
+2026-05-12,2026-05-12,"C9 - Ad 3 - 30/4","Concept 9 - Video Walkthrough - 30/4",inactive,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6906933275177,,
+2026-05-12,2026-05-12,"C9 - Ad 4 - 2/5","Concept 9 - V1 - Video Walkthrough - 2/5",active,,,,25,20,Daily,0.62,,,,,,,,,,,,24.8,,,1.190476,6908120265977,0.08,0.08
+2026-05-12,2026-05-12,"C9 - Ad 6 - 2/5","Concept 9 - V1 - Video Walkthrough - 2/5",active,,,,90,20,Daily,2.67,2,2.222222,1.335,,,,,,,,,29.666667,,0,1.071429,6908123805977,0.38888889,0.07777778
+2026-05-12,2026-05-12,"C9 - Ad 5 - 2/5","Concept 9 - V1 - Video Walkthrough - 2/5",active,,,,520,20,Daily,15.33,8,1.538462,1.91625,,,,,,,,,29.480769,,0,1.063395,6908123806177,0.33076923,0.08076923
+2026-05-12,2026-05-12,"C10 - Ad 1 - 5/5 (2:2)","Concept 10 - Native V1 - 5/5 - (2:2)",active,,,,581,20,Daily,18.04,11,1.893287,1.64,,,,,,,,,31.049914,,0,1.238806,6909901940177,0,0
+2026-05-12,2026-05-12,"C10 - Ad 3 - 5/5 (2:2)","Concept 10 - Native V1 - 5/5 - (2:2)",active,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6909910757177,,
+2026-05-12,2026-05-12,"C10 - Ad 2 - 5/5 (2:2)","Concept 10 - Native V1 - 5/5 - (2:2)",active,,,,42,20,Daily,0.94,,,,,,,,,,,,22.380952,,,1.615385,6909910757377,0,0
+2026-05-12,2026-05-12,"C11 - Ad 1 - 6/5","Concept 11 - Not Just Personalised - 6/5",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6910707833977,,
+2026-05-12,2026-05-12,"C11 - Ad 3 - 6/5","Concept 11 - Not Just Personalised - 6/5",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6910710424377,,
+2026-05-12,2026-05-12,"C11 - Ad 2 - 6/5","Concept 11 - Not Just Personalised - 6/5",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6910710424577,,
+2026-05-12,2026-05-12,"C12 - Ad 1 - 6/5","Concept 12 - Native Long Form - 6/5",active,,,,67,20,Daily,8.53,,,,,,,,,,,,127.313433,,,1,6910859253377,0,0
+2026-05-12,2026-05-12,"C12 - Ad 3 - 6/5","Concept 12 - Native Long Form - 6/5",inactive,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6910864107777,,
+2026-05-12,2026-05-12,"C12 - Ad 2 - 6/5","Concept 12 - Native Long Form - 6/5",active,,,,125,20,Daily,11.81,4,3.2,2.9525,,,,,,,,,94.48,,0,1.086957,6910864107977,0,0
+2026-05-12,2026-05-12,"C12 - V1 - Ad 1 - 7/5","Concept 12 - V1 - Native Long Form - 7/5",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6911252845377,,
+2026-05-12,2026-05-12,"C12 - V1 - Ad 2 - 7/5","Concept 12 - V1 - Native Long Form - 7/5",inactive,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6911253161377,,
+2026-05-12,2026-05-12,"C12 - V1 - Ad 3 - 7/5","Concept 12 - V1 - Native Long Form - 7/5",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6911253354177,,
+2026-05-12,2026-05-12,"C13 - Ad 1 - 7/5","Concept 13 - Claymation C12  - 7/5",active,,,,447,20,Daily,22.18,21,4.697987,1.05619,,,,,,,,,49.619687,,0,1.176316,6911511498577,0.46756152,0.13422819
+2026-05-12,2026-05-12,"C13 - Ad 3 - 7/5","Concept 13 - Claymation C12  - 7/5",inactive,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6911550268177,,
+2026-05-12,2026-05-12,"C13 - Ad 2 - 7/5","Concept 13 - Claymation C12  - 7/5",inactive,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6911550268377,,
+2026-05-12,2026-05-12,"C2 - Ad 1 - 2/4","Concept 2 - 2/4",inactive,,,,0,40,Daily,0,,,,,,,,,,,,0,,,0,6883619990577,,
+2026-05-12,2026-05-12,"C2 - Ad 2 - 2/4","Concept 2 - 2/4",active,1,actions:offsite_conversion.fb_pixel_purchase,37.67,1502,40,Daily,37.67,43,2.86285,0.876047,4,9.4175,2,18.835,1,37.67,82.49,2.189806,25.079893,82.49,0.02325581,1.072857,6883622805777,0,0
+2026-05-12,2026-05-12,"C2 - Ad 3 - 2/4","Concept 2 - 2/4",inactive,,,,0,40,Daily,0,,,,,,,,,,,,0,,,0,6883623044377,,
+2026-05-12,2026-05-12,"C2 - Ad 2 - 9/4 - POST ID","Scaling Winners - 9/4",active,4,actions:offsite_conversion.fb_pixel_purchase,25.31,3465,"Using campaign budget",0,101.24,109,3.145743,0.928807,16,6.3275,10,10.124,4,25.31,354.95,3.506025,29.217893,88.7375,0.03669725,1.037425,6889593065777,0,0
+2026-05-12,2026-05-12,"C4 - Ad 2 - 12/4","Concept 4 - USP - 12/4",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6891224523977,,
+2026-05-12,2026-05-12,"C4 - Ad 3 - 12/4","Concept 4 - USP - 12/4",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6891224524177,,
+2026-05-12,2026-05-12,"C4 - Ad 1 - 12/4","Concept 4 - USP - 12/4",inactive,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6891224524377,,
+2026-05-12,2026-05-12,"C5 - Ad 1 - 21/4 (2:2)","Concept 5 - Social Proof - 21/4 - (2:2)",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6898277216977,,
+2026-05-12,2026-05-12,"C5 - Ad 3 - 21/4 (2:2)","Concept 5 - Social Proof - 21/4 - (2:2)",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6898280827777,,
+2026-05-12,2026-05-12,"C5 - Ad 2 - 21/4 (2:2)","Concept 5 - Social Proof - 21/4 - (2:2)",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6898280827977,,
+2026-05-12,2026-05-12,"C6 - Ad 1 - 21/4 (2:2)","Concept 6 - Us vs Them - 21/4 - (2:2)",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6898284270777,,
+2026-05-12,2026-05-12,"C6 - Ad 3 - 21/4 (2:2)","Concept 6 - Us vs Them - 21/4 - (2:2)",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6898285644777,,
+2026-05-12,2026-05-12,"C6 - Ad 2 - 21/4 (2:2)","Concept 6 - Us vs Them - 21/4 - (2:2)",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6898285644977,,
+2026-05-12,2026-05-12,"C7 - Ad 1 - 28/4 (2:2)","Concept 7 - Stat Callout - 28/4 - (2:2)",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6904708816977,,
+2026-05-12,2026-05-12,"C7 - Ad 2 - 28/4 (2:2)","Concept 7 - Stat Callout - 28/4 - (2:2)",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6904709778177,,
+2026-05-12,2026-05-12,"C7 - Ad 3 - 28/4 (2:2)","Concept 7 - Stat Callout - 28/4 - (2:2)",not_delivering,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6904709778377,,
+2026-05-12,2026-05-12,"C8 - Ad 1 - 28/4 (2:2)","Concept 8 - Native - 28/4 - (2:2)",inactive,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6905164812977,,
+2026-05-12,2026-05-12,"C8 - Ad 2 - 28/4 (2:2)","Concept 8 - Native - 28/4 - (2:2)",inactive,,,,0,20,Daily,0,,,,,,,,,,,,0,,,0,6905173278777,,
+2026-05-12,2026-05-12,"C8 - Ad 3 - 28/4 (2:2)","27th-3rd May Winner",not_delivering,,,,0,"Using campaign budget",0,0,,,,,,,,,,,,0,,,0,6909469573377,,
